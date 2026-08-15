@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 export default function ProtectedRoute({ requiredRole }) {
   const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('role'); // expected: 'admin' or 'student'
+  const userRole = localStorage.getItem('role'); 
 
   if (!token) {
     return <Navigate to="/login" replace />;
