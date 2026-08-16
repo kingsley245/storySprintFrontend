@@ -1,228 +1,647 @@
-import React, { useState } from 'react';
-import { 
-  Bell, 
-  Calendar, 
-  MoreVertical, 
-  TrendingUp, 
-  TrendingDown, 
-  Clock 
+import { useEffect, useMemo, useState } from 'react';
+import api from '../../api/axios';
+import {
+  Bell,
+  Calendar,
+  MoreVertical,
+  TrendingUp,
+  Clock,
+  Loader2,
+  AlertTriangle,
+  Users,
+  BarChart3,
 } from 'lucide-react';
 
+interface StudentGrowth {
+  date: string;
+  students: number;
+}
+
+interface CourseCompletion {
+  courseId: string;
+  title: string;
+  percentage: number;
+}
+
+interface ActiveStudent {
+  studentId: string;
+  name: string;
+  watchTimeSeconds: number;
+}
+
+interface ActiveCourse {
+  courseId: string;
+  title: string;
+  percentage: number;
+}
+
+interface AnalyticsResponse {
+  totalStudents: number;
+  completionRate: number;
+  engagementRate: number;
+  totalWatchTimeSeconds: number;
+  studentGrowth: StudentGrowth[];
+  courseCompletions: CourseCompletion[];
+  activeStudents: ActiveStudent[];
+  activeCourses: ActiveCourse[];
+}
+
 export default function Analytics() {
-  const [dateRange, setDateRange] = useState('May 10 - May 16, 2024');
 
-  // Stats Card Data
-  const stats = [
-    {
-      title: 'Total Students',
-      value: '245',
-      change: '+12 this week',
-      isPositive: true,
-    },
-    {
-      title: 'Completion Rate',
-      value: '68%',
-      change: '+8% this week',
-      isPositive: true,
-    },
-    {
-      title: 'Engagement',
-      value: '82%',
-      change: '+4% this week',
-      isPositive: true,
-    },
-    {
-      title: 'Watch Time',
-      value: '1,280h',
-      change: '+100h this week',
-      isPositive: true,
-      isNeutral: true,
-    },
-  ];
+  const [analytics, setAnalytics] =
+    useState<AnalyticsResponse | null>(null);
 
-  // Course Completion Progress
-  const courseCompletions = [
-    { title: 'Video Editing Masterclass', percentage: 82 },
-    { title: 'Storytelling for Beginners', percentage: 71 },
-    { title: 'YouTube Growth Guide', percentage: 63 },
-  ];
+  const [loading, setLoading] =
+    useState(true);
 
-  // Most Active Students
-  const activeStudents = [
-    { name: 'John Doe', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80', time: '12h 45m' },
-    { name: 'Jane Smith', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80', time: '10h 30m' },
-    { name: 'Michael Lee', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80', time: '8h 15m' },
-  ];
+  const [error, setError] =
+    useState('');
 
-  // Most Active Courses
-  const activeCourses = [
-    { title: 'Video Editing Masterclass', percentage: 85 },
-    { title: 'YouTube Growth Guide', percentage: 75 },
-    { title: 'Storytelling for Beginners', percentage: 60 },
-  ];
+  useEffect(() => {
+
+    const loadAnalytics = async () => {
+
+      try {
+
+        setLoading(true);
+        setError('');
+
+        const response =
+          await api.get('/admin/analytics');
+
+        setAnalytics(response.data);
+
+      } catch (err: any) {
+
+        console.error(
+          'Failed to load analytics:',
+          err
+        );
+
+        setError(
+          err?.response?.data?.message ||
+          'Failed to load analytics.'
+        );
+
+      } finally {
+
+        setLoading(false);
+      }
+    };
+
+    loadAnalytics();
+
+  }, []);
+
+
+  const formatWatchTime = (
+    seconds: number
+  ) => {
+
+    const hours =
+      Math.floor(seconds / 3600);
+
+    const minutes =
+      Math.floor(
+        (seconds % 3600) / 60
+      );
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+
+    return `${minutes}m`;
+  };
+
+
+  const growthPoints =
+    analytics?.studentGrowth ?? [];
+
+
+  const maxStudents =
+    Math.max(
+      ...growthPoints.map(
+        point => point.students
+      ),
+      1
+    );
+
+
+  if (loading) {
+
+    return (
+      <div className="min-h-[500px] flex items-center justify-center">
+
+        <div className="flex flex-col items-center gap-3">
+
+          <Loader2 className="w-8 h-8 animate-spin text-brand" />
+
+          <p className="text-sm text-gray-500">
+            Loading analytics...
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
+
+  if (error) {
+
+    return (
+      <div className="space-y-4">
+
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+
+          <AlertTriangle className="w-5 h-5" />
+
+          <span className="text-sm">
+            {error}
+          </span>
+
+        </div>
+
+      </div>
+    );
+  }
+
+
+  if (!analytics) {
+    return null;
+  }
+
 
   return (
+
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      
-      {/* Top Header & Date Picker */}
+
+      {/* HEADER */}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track your platform performance.</p>
+
+          <h1 className="text-2xl font-bold text-gray-900">
+            Analytics
+          </h1>
+
+          <p className="text-sm text-gray-500 mt-0.5">
+            Track your platform performance.
+          </p>
+
         </div>
+
 
         <div className="flex items-center gap-3">
-          <button className="p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg border border-gray-100 shadow-sm">
+
+          <button className="p-2 text-gray-400 bg-white rounded-lg border border-gray-100 shadow-sm">
+
             <Bell className="w-4 h-4" />
+
           </button>
+
 
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm text-xs font-medium text-gray-700">
+
             <Calendar className="w-3.5 h-3.5 text-gray-400" />
-            <span>{dateRange}</span>
+
+            <span>
+              Platform Overview
+            </span>
+
           </div>
 
-          <button className="p-2 text-gray-400 hover:text-gray-600 bg-white rounded-lg border border-gray-100 shadow-sm">
+
+          <button className="p-2 text-gray-400 bg-white rounded-lg border border-gray-100 shadow-sm">
+
             <MoreVertical className="w-4 h-4" />
+
           </button>
+
         </div>
+
       </div>
 
-      {/* 4 Overview Stat Cards */}
+
+      {/* STAT CARDS */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm space-y-2">
-            <p className="text-xs font-medium text-gray-500">{stat.title}</p>
-            <h2 className="text-2xl font-extrabold text-gray-900">{stat.value}</h2>
-            
-            <div className="flex items-center gap-1 text-[11px] font-semibold">
-              <span className={stat.isNeutral ? "text-emerald-600" : "text-emerald-600 flex items-center gap-0.5"}>
-                {!stat.isNeutral && <TrendingUp className="w-3 h-3" />}
-                {stat.isNeutral && <Clock className="w-3 h-3 inline mr-0.5" />}
-                {stat.change}
-              </span>
-            </div>
-          </div>
-        ))}
+
+        <StatCard
+          title="Total Students"
+          value={analytics.totalStudents.toString()}
+          icon={<Users className="w-4 h-4" />}
+        />
+
+        <StatCard
+          title="Completion Rate"
+          value={`${analytics.completionRate}%`}
+          icon={<TrendingUp className="w-4 h-4" />}
+        />
+
+        <StatCard
+          title="Engagement"
+          value={`${analytics.engagementRate}%`}
+          icon={<BarChart3 className="w-4 h-4" />}
+        />
+
+        <StatCard
+          title="Watch Time"
+          value={formatWatchTime(
+            analytics.totalWatchTimeSeconds
+          )}
+          icon={<Clock className="w-4 h-4" />}
+        />
+
       </div>
 
-      {/* Middle Section: Student Growth Chart & Course Completion */}
+
+      {/* GROWTH + COURSE COMPLETION */}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Student Growth Line Chart (2/3 width) */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
-          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">Student Growth</h3>
-          
-          <div className="h-48 w-full pt-4">
-            {/* SVG Line Chart */}
-            <svg className="w-full h-full overflow-visible" viewBox="0 0 500 150">
-              {/* Background Grid Lines */}
-              <line x1="0" y1="30" x2="500" y2="30" stroke="#f3f4f6" strokeWidth="1" />
-              <line x1="0" y1="80" x2="500" y2="80" stroke="#f3f4f6" strokeWidth="1" />
-              <line x1="0" y1="130" x2="500" y2="130" stroke="#f3f4f6" strokeWidth="1" />
 
-              {/* Smooth Trend Path */}
-              <path
-                d="M 20 120 L 100 100 L 170 130 L 250 80 L 330 30 L 400 70 L 480 20"
-                fill="none"
-                stroke="#6366f1"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+        {/* STUDENT GROWTH */}
 
-              {/* Data Points */}
-              <circle cx="20" cy="120" r="3.5" fill="#6366f1" />
-              <circle cx="100" cy="100" r="3.5" fill="#6366f1" />
-              <circle cx="170" cy="130" r="3.5" fill="#6366f1" />
-              <circle cx="250" cy="80" r="3.5" fill="#6366f1" />
-              <circle cx="330" cy="30" r="3.5" fill="#6366f1" />
-              <circle cx="400" cy="70" r="3.5" fill="#6366f1" />
-              <circle cx="480" cy="20" r="3.5" fill="#6366f1" />
-            </svg>
-          </div>
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
 
-          {/* X-Axis Dates */}
-          <div className="flex justify-between text-[11px] font-medium text-gray-400 pt-2 px-1">
-            <span>May 10</span>
-            <span>May 11</span>
-            <span>May 12</span>
-            <span>May 14</span>
-            <span>May 15</span>
-            <span>May 16</span>
-          </div>
+          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+            Student Growth
+          </h3>
+
+          {growthPoints.length === 0 ? (
+
+            <div className="h-52 flex items-center justify-center text-sm text-gray-400">
+              No student growth data yet.
+            </div>
+
+          ) : (
+
+            <div className="mt-6 h-52">
+
+              <svg
+                className="w-full h-full"
+                viewBox="0 0 700 220"
+                preserveAspectRatio="none"
+              >
+
+                {/* GRID */}
+
+                <line
+                  x1="20"
+                  y1="30"
+                  x2="680"
+                  y2="30"
+                  stroke="#f1f5f9"
+                />
+
+                <line
+                  x1="20"
+                  y1="110"
+                  x2="680"
+                  y2="110"
+                  stroke="#f1f5f9"
+                />
+
+                <line
+                  x1="20"
+                  y1="190"
+                  x2="680"
+                  y2="190"
+                  stroke="#f1f5f9"
+                />
+
+
+                {/* LINE */}
+
+                <polyline
+                  fill="none"
+                  stroke="#6366f1"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={
+                    growthPoints
+                      .map((point, index) => {
+
+                        const x =
+                          growthPoints.length === 1
+                            ? 350
+                            : 20 +
+                              (
+                                index /
+                                (
+                                  growthPoints.length - 1
+                                )
+                              ) *
+                              660;
+
+                        const y =
+                          190 -
+                          (
+                            point.students /
+                            maxStudents
+                          ) *
+                          160;
+
+                        return `${x},${y}`;
+                      })
+                      .join(' ')
+                  }
+                />
+
+
+                {/* POINTS */}
+
+                {growthPoints.map(
+                  (point, index) => {
+
+                    const x =
+                      growthPoints.length === 1
+                        ? 350
+                        : 20 +
+                          (
+                            index /
+                            (
+                              growthPoints.length - 1
+                            )
+                          ) *
+                          660;
+
+                    const y =
+                      190 -
+                      (
+                        point.students /
+                        maxStudents
+                      ) *
+                      160;
+
+                    return (
+                      <circle
+                        key={point.date}
+                        cx={x}
+                        cy={y}
+                        r="4"
+                        fill="#6366f1"
+                      />
+                    );
+                  }
+                )}
+
+              </svg>
+
+            </div>
+          )}
+
         </div>
 
-        {/* Course Completion Progress Bars (1/3 width) */}
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-5">
-          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">Course Completion</h3>
-          
-          <div className="space-y-4 pt-1">
-            {courseCompletions.map((item, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-gray-700">
-                  <span className="truncate pr-2">{item.title}</span>
-                  <span>{item.percentage}%</span>
-                </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+
+        {/* COURSE COMPLETION */}
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+
+          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+            Course Completion
+          </h3>
+
+
+          <div className="space-y-5 mt-5">
+
+            {analytics.courseCompletions.length === 0 ? (
+
+              <p className="text-sm text-gray-400">
+                No course progress yet.
+              </p>
+
+            ) : (
+
+              analytics.courseCompletions.map(
+                course => (
+
                   <div
-                    className="bg-brand h-full rounded-full transition-all duration-500"
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+                    key={course.courseId}
+                    className="space-y-1.5"
+                  >
+
+                    <div className="flex justify-between text-xs font-semibold text-gray-700">
+
+                      <span className="truncate pr-2">
+                        {course.title}
+                      </span>
+
+                      <span>
+                        {course.percentage}%
+                      </span>
+
+                    </div>
+
+                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+
+                      <div
+                        className="bg-brand h-full rounded-full transition-all duration-500"
+                        style={{
+                          width:
+                            `${Math.min(
+                              course.percentage,
+                              100
+                            )}%`
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
           </div>
+
         </div>
 
       </div>
 
-      {/* Bottom Section: Most Active Students & Most Active Courses */}
+
+      {/* ACTIVE STUDENTS + COURSES */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Most Active Students */}
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
-          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">Most Active Students</h3>
-          
-          <div className="space-y-3.5">
-            {activeStudents.map((student, idx) => (
-              <div key={idx} className="flex items-center justify-between p-1">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={student.avatar}
-                    alt={student.name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <span className="text-xs font-semibold text-gray-800">{student.name}</span>
-                </div>
-                <span className="text-xs font-medium text-gray-500">{student.time}</span>
-              </div>
-            ))}
+
+
+        {/* ACTIVE STUDENTS */}
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+
+          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+            Most Active Students
+          </h3>
+
+
+          <div className="space-y-4 mt-5">
+
+            {analytics.activeStudents.length === 0 ? (
+
+              <p className="text-sm text-gray-400">
+                No student activity yet.
+              </p>
+
+            ) : (
+
+              analytics.activeStudents.map(
+                student => (
+
+                  <div
+                    key={student.studentId}
+                    className="flex items-center justify-between"
+                  >
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold">
+
+                        {student.name
+                          .split(' ')
+                          .map(
+                            part =>
+                              part[0]
+                          )
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()}
+
+                      </div>
+
+                      <span className="text-xs font-semibold text-gray-800">
+                        {student.name}
+                      </span>
+
+                    </div>
+
+
+                    <span className="text-xs font-medium text-gray-500">
+                      {formatWatchTime(
+                        student.watchTimeSeconds
+                      )}
+                    </span>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
           </div>
+
         </div>
 
-        {/* Most Active Courses */}
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-4">
-          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">Most Active Courses</h3>
-          
-          <div className="space-y-4 pt-1">
-            {activeCourses.map((course, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-gray-700">
-                  <span className="truncate pr-2">{course.title}</span>
-                  <span>{course.percentage}%</span>
-                </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+
+        {/* ACTIVE COURSES */}
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+
+          <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+            Most Active Courses
+          </h3>
+
+
+          <div className="space-y-5 mt-5">
+
+            {analytics.activeCourses.length === 0 ? (
+
+              <p className="text-sm text-gray-400">
+                No course activity yet.
+              </p>
+
+            ) : (
+
+              analytics.activeCourses.map(
+                course => (
+
                   <div
-                    className="bg-brand h-full rounded-full transition-all duration-500"
-                    style={{ width: `${course.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+                    key={course.courseId}
+                    className="space-y-1.5"
+                  >
+
+                    <div className="flex justify-between text-xs font-semibold text-gray-700">
+
+                      <span className="truncate pr-2">
+                        {course.title}
+                      </span>
+
+                      <span>
+                        {course.percentage}%
+                      </span>
+
+                    </div>
+
+                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+
+                      <div
+                        className="bg-brand h-full rounded-full"
+                        style={{
+                          width:
+                            `${Math.min(
+                              course.percentage,
+                              100
+                            )}%`
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
           </div>
+
         </div>
 
       </div>
+
+    </div>
+  );
+}
+
+
+/* ==========================================
+   STAT CARD
+   ========================================== */
+
+function StatCard({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
+
+  return (
+
+    <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm space-y-3">
+
+      <div className="flex items-center justify-between">
+
+        <p className="text-xs font-medium text-gray-500">
+          {title}
+        </p>
+
+        <div className="text-brand">
+          {icon}
+        </div>
+
+      </div>
+
+      <h2 className="text-2xl font-extrabold text-gray-900">
+        {value}
+      </h2>
 
     </div>
   );

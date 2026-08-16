@@ -12,7 +12,7 @@ export default function LessonViewer() {
   const lessonData = {
     title: 'Introduction to Video Editing',
     lessonMeta: 'Lesson 01 of 12',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
     notes: 'Video editing is the process of manipulating and rearranging video shots. In this lesson, you will learn the basics of video editing interface and workflow.',
     learningPoints: [
       'Understanding the interface',

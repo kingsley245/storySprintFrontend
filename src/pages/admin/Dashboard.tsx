@@ -436,16 +436,16 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
 
-
+{/* 
           <OverviewItem
             label="Users"
             value={stats.totalUsers}
-          />
+          /> */}
 
-          <OverviewItem
+          {/* <OverviewItem
             label="Videos"
             value={stats.totalVideos}
-          />
+          /> */}
 
           <OverviewItem
             label="Resources"
