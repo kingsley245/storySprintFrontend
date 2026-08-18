@@ -1,12 +1,6 @@
+import React, { useState } from 'react';
 
-
-export default function ComingSoonModal({
-  isOpen = true,
-  onClose,
-}: {
-  isOpen?: boolean;
-  onClose?: () => void;
-}) {
+export default function ComingSoonModal({ isOpen = true, onClose }) {
   if (!isOpen) return null;
 
   const handleGoBack = () => {
@@ -34,7 +28,7 @@ export default function ComingSoonModal({
         </h2>
 
         <p className="mt-2 text-sm text-gray-600">
-          We are working hard to bring you this feature. Please check back later! THANK YOU
+          Festus is  working hard to bring you this feature. Please check back later! THANK YOU
         </p>
 
         <div className="mt-6">

@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Users,
   RefreshCw,
+  UserPlus,
 } from 'lucide-react';
 
 interface StudentUser {
@@ -176,7 +177,7 @@ export default function UsersManagement() {
           </p>
         </div>
 
-        <button
+        {/* <button
           onClick={() =>
             navigate('/admin/users/create')
           }
@@ -184,7 +185,36 @@ export default function UsersManagement() {
         >
           <Plus className="w-4 h-4" />
           Create Student
-        </button>
+        </button> */}
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+  
+  <div className="flex items-center gap-2">
+
+    <button
+      onClick={() =>
+        navigate('/admin/users/enroll')
+      }
+      className="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-brand border border-brand/20 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+    >
+      <UserPlus className="w-4 h-4" />
+      Enroll Student
+    </button>
+
+    <button
+      onClick={() =>
+        navigate('/admin/users/create')
+      }
+      className="inline-flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+    >
+      <Plus className="w-4 h-4" />
+      Create Student
+    </button>
+
+  </div>
+
+</div>
 
       </div>
 
@@ -358,25 +388,32 @@ export default function UsersManagement() {
                       className="hover:bg-gray-50/50 transition-colors"
                     >
 
-                      <td className="py-4 px-6">
+                     <td className="py-4 px-6">
+  <button
+    onClick={() =>
+      navigate(`/admin/users/${student.id}`)
+    }
+    className="flex items-center gap-3 text-left group"
+  >
 
-                        <div className="flex items-center gap-3">
+    <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold">
+      {student.firstName?.[0]}
+      {student.lastName?.[0]}
+    </div>
 
-                          <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold">
-                            {student.firstName[0]}
-                            {student.lastName[0]}
-                          </div>
+    <div>
+      <p className="font-medium text-gray-900 group-hover:text-brand transition-colors">
+        {student.firstName}{' '}
+        {student.lastName}
+      </p>
 
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {student.firstName}{' '}
-                              {student.lastName}
-                            </p>
-                          </div>
+      <p className="text-xs text-gray-400">
+        View student
+      </p>
+    </div>
 
-                        </div>
-
-                      </td>
+  </button>
+</td>
 
                       <td className="py-4 px-6 text-gray-500">
                         {student.email}
@@ -403,10 +440,14 @@ export default function UsersManagement() {
                       <td className="py-4 px-6 text-right">
 
                         <button
-                          className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100"
-                        >
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
+  onClick={() =>
+    navigate(`/admin/users/${student.id}`)
+  }
+  title="Manage student"
+  className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100"
+>
+  <MoreHorizontal className="w-4 h-4" />
+</button>
 
                       </td>
 

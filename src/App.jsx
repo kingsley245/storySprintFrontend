@@ -7,6 +7,8 @@ import SetupPassword from './pages/auth/SetupPassword';
 import CourseEdit from './pages/admin/CourseEdit';
 import AdminLessons from './pages/admin/AdminLessons';
 import ComingSoonModal from './pages/admin/coming-soon';
+// import StudentCourse from './pages/student/StudentCourse';
+import StudentLesson from './pages/student/StudentLesson';
 
 // Pages
 // import Login from './pages/auth/Login';
@@ -21,17 +23,19 @@ import CourseManagement from './pages/admin/CourseManage';
 import CreateCourse from './pages/admin/CreateCourse';
 import AddLesson from './pages/admin/AddLesson';
 import EditLesson from './pages/admin/LessonEditor';
-// import LessonEditor from './pages/admin/LessonEditor';
+import StudentEnrollmentManagement from './pages/admin/StudentEnrollmentManagement';
+
 import AdminAnalytics from './pages/admin/Analytics';
 import AdminSettings from './pages/admin/AdminSettings';
+import EnrollStudent from './pages/admin/EnrollStudent';
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import MyCourses from './pages/student/MyCourses';
 import CourseView from './pages/student/CourseView';
-import LessonViewer from './pages/student/LessonViewer';
+
 import MyProgress from './pages/student/MyProgress';
-import StudentSettings from './pages/student/StudentSettings';
-// import Courses from './pages/admin/Courses';
+
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,7 +44,7 @@ export default function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route
-  path="/setup-password"
+  path="/set-password"
   element={<SetupPassword />}
 />
         </Route>
@@ -56,11 +60,19 @@ export default function App() {
     <Route path="users" element={<UsersManagement />} />
     <Route path="settings" element={<AdminSettings/>} />
     <Route path="resources" element={<ComingSoonModal/>} />
+    <Route
+  path="/admin/users/:userId"
+  element={<StudentEnrollmentManagement />}
+/>
 
     <Route
       path="users/create"
       element={<CreateStudent />}
     />
+    <Route
+  path="/admin/users/enroll"
+  element={<EnrollStudent />}
+/>
 
     {/* Courses */}
     <Route
@@ -105,18 +117,27 @@ export default function App() {
   </Route>
 </Route>
 
-        {/* Protected Student Routes */}
-        <Route element={<ProtectedRoute requiredRole="student" />}>
-          <Route path="/student" element={<StudentLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="courses" element={<MyCourses />} />
-            <Route path="courses/:courseId" element={<CourseView />} />
-            <Route path="courses/:courseId/lessons/:lessonId" element={<LessonViewer />} />
-            <Route path="progress" element={<MyProgress />} />
-            <Route path="settings" element={<StudentSettings />} />
-          </Route>
-        </Route>
+
+<Route element={<ProtectedRoute requiredRole="student" />}>
+  <Route path="/student" element={<StudentLayout />}>
+    <Route index element={<Navigate to="dashboard" replace />} />
+
+    <Route path="dashboard" element={<StudentDashboard />} />
+
+    <Route path="courses" element={<MyCourses />} />
+
+    <Route path="courses/:courseId" element={<CourseView />} />
+
+    <Route
+      path="courses/:courseId/learn/:lessonId"
+      element={<StudentLesson />}
+    />
+
+    <Route path="progress" element={<MyProgress />} />
+
+    <Route path="settings" element={<ComingSoonModal />} />
+  </Route>
+</Route>
 
         {/* Fallback Redirect */}
         <Route path="*" element={<Navigate to="/login" replace />} />

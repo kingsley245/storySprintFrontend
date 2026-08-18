@@ -10,6 +10,7 @@ import {
   Sparkles,
   BookOpen,
 } from "lucide-react";
+import { saveAuth } from "../../utils/authStorage";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -34,6 +35,9 @@ export default function Login() {
       });
 
       const { token, user } = response.data;
+      console.log("========== RAW LOGIN RESPONSE ==========");
+console.log(JSON.stringify(response.data, null, 2));
+console.log("========================================");
 
       if (!token) {
         throw new Error("Authentication token was not returned.");
@@ -44,16 +48,7 @@ export default function Login() {
         : "student";
 
       
-      const storage = rememberMe ? localStorage : sessionStorage;
-
-      storage.setItem("token", token);
-
-      if (user) {
-        storage.setItem("role", userRole);
-        storage.setItem("user", JSON.stringify(user));
-      }
-
-      console.log("Backend Login Response:", response.data);
+      saveAuth(token, user, rememberMe);
 
       if (userRole === "admin") {
         navigate("/admin/dashboard", { replace: true });
