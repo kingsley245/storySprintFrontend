@@ -9,6 +9,7 @@ import AdminLessons from './pages/admin/AdminLessons';
 import ComingSoonModal from './pages/admin/coming-soon';
 // import StudentCourse from './pages/student/StudentCourse';
 import StudentLesson from './pages/student/StudentLesson';
+import NotFound from './pages/NotFound';
 
 // Pages
 // import Login from './pages/auth/Login';
@@ -47,6 +48,12 @@ export default function App() {
   path="/set-password"
   element={<SetupPassword />}
 />
+ <Route
+  path="not-found"
+  element={<NotFound />}
+/>
+
+
         </Route>
 
         {/* Protected Admin Routes */}
